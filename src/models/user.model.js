@@ -1,56 +1,21 @@
-const validator = require('validator');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database');
+const bcrypt = require('bcryptjs');
 
-module.exports = (sequelize, dataType) => {
-  const user = sequelize.define(
-    'user',
-    {
-      firstName: {
-        type: dataType.STRING,
-        allowNull: false,
-        trim: true,
-      },
-      lastName: {
-        type: dataType.STRING,
-        allowNull: false,
-        trim: true,
-      },
-      middleName: {
-        type: dataType.STRING,
-        trim: true,
-      },
-      email: {
-        type: dataType.STRING,
-        allowNull: false,
-        trim: true,
-        lowercase: true,
-        validate(value) {
-          if (!validator.isEmail(value)) {
-            throw new Error('Invalid email');
-          }
-        },
-      },
-      phoneNumber: {
-        type: dataType.STRING,
-        // allowNull: false,
-        trim: true,
-      },
-      gender: {
-        type: dataType.STRING,
-        // allowNull: false,
-        trim: true,
-      },
-      dOB: {
-        type: dataType.DATE,
-        // allowNull: false,
-        trim: true,
-      },
-      occupation: {
-        type: dataType.STRING,
-        // allowNull: false,
-        trim: true,
-      },
-    },
-  );
+const User = sequelize.define('User', {
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+});
 
-  return user;
-};
+User.beforeCreate(async (user) => {
+  user.password = await bcrypt.hash(user.password, 10);
+});
+
+module.exports = User;
